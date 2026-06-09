@@ -8,6 +8,10 @@
     <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
     
     <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
         body, html {
             margin: 0;
             padding: 0;
@@ -36,36 +40,79 @@
             max-height: 100vh;
         }
 
-        /* --- STILE DEL PANNELLO DI CONTROLLO --- */
+        /* --- PULSANTE MENU TOGGLE --- */
+        #btn-toggle {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            z-index: 200;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.25);
+            color: white;
+            font-size: 22px;
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, transform 0.1s;
+            line-height: 1;
+        }
+
+        #btn-toggle:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        #btn-toggle:active {
+            transform: scale(0.92);
+        }
+
+        /* --- PANNELLO DI CONTROLLO --- */
         #pannello-controllo {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            padding: 20px;
+            position: fixed;
+            top: 66px;
+            left: 12px;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(16px);
+            padding: 18px;
             border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             color: white;
             z-index: 100;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
+            width: 260px;
+            max-height: calc(100vh - 80px);
+            overflow-y: auto;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        #pannello-controllo.pannello-nascosto {
+            transform: translateX(-120%);
+            opacity: 0;
+            pointer-events: none;
         }
 
         #pannello-controllo input {
             background: transparent;
-            border: 1px solid white;
+            border: 1px solid rgba(255,255,255,0.3);
             color: white;
             padding: 8px;
             font-size: 14px;
             border-radius: 6px;
-            width: 200px;
+            width: 100%;
             outline: none;
         }
 
+        #pannello-controllo input:focus {
+            border-color: rgba(255,255,255,0.6);
+        }
+
         #pannello-controllo input[type="color"] {
-            width: 100%;
             height: 40px;
             padding: 0;
             border: none;
@@ -74,35 +121,78 @@
             cursor: pointer;
         }
 
-        #pannello-controllo label {
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            opacity: 0.8;
-            display: block;
-            margin-bottom: 5px;
+        #pannello-controllo input[type="range"] {
+            border: none;
+            padding: 0;
+            height: 4px;
         }
 
-        #btn-scarica {
+        #pannello-controllo label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.7;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        #btn-scarica, #btn-animazione, #btn-record {
             background-color: #ffffff;
             color: #000000;
             border: none;
             padding: 10px 15px;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
             text-transform: uppercase;
             border-radius: 6px;
             cursor: pointer;
             transition: background-color 0.2s, transform 0.1s;
-            margin-top: 10px;
+            margin-top: 8px;
         }
 
-        #btn-scarica:hover {
-            background-color: #cccccc;
+        #btn-animazione {
+            margin-top: 0;
+            padding: 6px 12px;
+            font-size: 13px;
+            min-width: 60px;
+            flex-shrink: 0;
         }
 
-        #btn-scarica:active {
+        #btn-record {
+            margin-top: 0;
+            padding: 6px 12px;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        #btn-scarica:hover, #btn-animazione:hover, #btn-record:hover {
+            background-color: #dddddd;
+        }
+
+        #btn-scarica:active, #btn-animazione:active, #btn-record:active {
             transform: scale(0.95);
+        }
+
+        #btn-record:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        #select-durata, #select-formato {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 6px 8px;
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        #select-durata option, #select-formato option {
+            background: #222;
+            color: white;
         }
 
         circle {
@@ -114,9 +204,85 @@
         circle:active {
             cursor: grabbing;
         }
+
+        /* --- HINT TESTI --- */
+        .hint {
+            font-size: 10px;
+            opacity: 0.45;
+            line-height: 1.4;
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 768px) {
+            #pannello-controllo {
+                width: calc(100vw - 24px);
+                max-width: 320px;
+                top: 66px;
+                left: 12px;
+                padding: 14px;
+                gap: 10px;
+            }
+
+            #pannello-controllo input {
+                font-size: 13px;
+                padding: 7px;
+            }
+
+            #pannello-controllo input[type="color"] {
+                height: 36px;
+            }
+
+            #btn-toggle {
+                top: 10px;
+                left: 10px;
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #pannello-controllo {
+                width: calc(100vw - 16px);
+                max-width: none;
+                top: 60px;
+                left: 8px;
+                padding: 12px;
+                gap: 8px;
+                max-height: calc(100vh - 70px);
+            }
+
+            #pannello-controllo input {
+                font-size: 12px;
+                padding: 6px;
+            }
+
+            #pannello-controllo input[type="color"] {
+                height: 32px;
+            }
+
+            #pannello-controllo label {
+                font-size: 10px;
+            }
+
+            #btn-toggle {
+                top: 8px;
+                left: 8px;
+                width: 36px;
+                height: 36px;
+                font-size: 18px;
+            }
+
+            #btn-scarica, #btn-animazione, #btn-record {
+                font-size: 12px;
+                padding: 8px 12px;
+            }
+        }
     </style>
 </head>
 <body>
+
+    <button id="btn-toggle">☰</button>
 
     <div id="pannello-controllo">
         <div>
@@ -139,8 +305,48 @@
             <label>Color</label>
             <input type="color" id="input-colore" value="#ffffff">
         </div>
+        <div>
+            <label>Larghezza testo grande</label>
+            <input type="range" id="slider-larghezza-grande" min="0.1" max="5" step="0.01" value="1" style="width:100%">
+        </div>
+        <div>
+            <label>Larghezza testo piccolo</label>
+            <input type="range" id="slider-larghezza-piccolo" min="0.1" max="5" step="0.01" value="1" style="width:100%">
+        </div>
+        <div style="border-top:1px solid rgba(255,255,255,0.1)"></div>
+        <div>
+            <label>Animazione</label>
+            <div style="display:flex;gap:8px;align-items:center">
+                <button id="btn-animazione">▶</button>
+                <input type="range" id="slider-velocita" min="0.1" max="5" step="0.1" value="1" style="flex:1">
+            </div>
+        </div>
+        <div style="border-top:1px solid rgba(255,255,255,0.1)"></div>
+        <div>
+            <label>Formato</label>
+            <select id="select-formato">
+                <option value="70x100">70×100cm</option>
+                <option value="A3" selected>A3</option>
+                <option value="A4">A4</option>
+                <option value="A5">A5</option>
+                <option value="1080x1350">1080×1350px</option>
+                <option value="1080x1920">1080×1920px</option>
+            </select>
+        </div>
+        <div style="border-top:1px solid rgba(255,255,255,0.1)"></div>
+        <div>
+            <label>Video</label>
+            <div style="display:flex;gap:6px;align-items:center">
+                <select id="select-durata">
+                    <option value="5">5 sec</option>
+                    <option value="10" selected>10 sec</option>
+                    <option value="15">15 sec</option>
+                </select>
+                <button id="btn-record">🔴</button>
+            </div>
+        </div>
         <button id="btn-scarica">Download Poster PNG</button>
-        <div style="font-size:11px;opacity:0.6;margin-top:2px">Press SPACEBAR to randomize circles</div>
+        <div class="hint">Press SPACEBAR to randomize circles</div>
     </div>
 
     <div id="svg-container">
@@ -183,6 +389,11 @@
             <g class="cls-6">
                 <g id="_2" data-name="2">
                     <rect x="0" y="0" width="841.89" height="1190.55" fill="#000000"/>
+                    
+                    <g id="guide-formato" opacity="0.4" pointer-events="none">
+                        <rect class="g-bordo" x="0" y="0" width="841.89" height="1190.55" fill="none" stroke="white" stroke-width="2" stroke-dasharray="8 4"/>
+                        <rect class="g-margine" x="56.69" y="56.69" width="728.51" height="1077.17" fill="none" stroke="white" stroke-width="1" stroke-dasharray="4 4"/>
+                    </g>
                     
                     <circle class="cls-2" cx="420.94" cy="871.65" r="392.6"/>
                     <circle class="cls-2" cx="420.94" cy="349.27" r="392.6"/>
@@ -269,9 +480,202 @@
                 });
             });
 
-            // --- 5. GESTIONE POSIZIONAMENTO RANDOM CERCHI (SPACEBAR) ---
+            // --- 5. GESTIONE LARGHEZZA LETTERE (scaleX) ---
+            let scalaXGrande = 1;
+            let scalaXPiccolo = 1;
+            const cls3Testi = [svgTestoAlto, svgTestoBasso];
+            const cls4Testi = [svgTestoGrande1, svgTestoGrande2];
+            const sliderLarghezzaGrande = document.getElementById('slider-larghezza-grande');
+            const sliderLarghezzaPiccolo = document.getElementById('slider-larghezza-piccolo');
+
+            function aggiornaTrasformTesto() {
+                [svgTestoAlto, svgTestoBasso].forEach(el => {
+                    const m = el.getAttribute('transform').match(/translate\(([\d.]+)\s+([\d.]+)\)/);
+                    if (m) el.style.transform = `translate(${m[1]}px, ${m[2]}px) scaleX(${scalaXPiccolo})`;
+                });
+                [svgTestoGrande1, svgTestoGrande2].forEach(el => {
+                    const m = el.getAttribute('transform').match(/translate\(([\d.]+)\s+([\d.]+)\)/);
+                    if (m) el.style.transform = `translate(${m[1]}px, ${m[2]}px) scaleX(${scalaXGrande})`;
+                });
+            }
+
+            sliderLarghezzaGrande.addEventListener('input', function() {
+                scalaXGrande = parseFloat(this.value);
+                aggiornaTrasformTesto();
+            });
+
+            sliderLarghezzaPiccolo.addEventListener('input', function() {
+                scalaXPiccolo = parseFloat(this.value);
+                aggiornaTrasformTesto();
+            });
+
+            // --- 6. GESTIONE CAMBIO FORMATO ---
+            const FORMATI = {
+                '70x100':   { w: 700,    h: 1000   },
+                'A3':       { w: 841.89, h: 1190.55 },
+                'A4':       { w: 595.28, h: 841.89  },
+                'A5':       { w: 420.94, h: 595.28  },
+                '1080x1350':{ w: 1080,   h: 1350    },
+                '1080x1920':{ w: 1080,   h: 1920    }
+            };
+            const BASE_W = 841.89;
+            const BASE_H = 1190.55;
+            const BASE_CLS3 = 36;
+            const BASE_CLS4 = 654.11;
+            let formatoCorrente = { w: BASE_W, h: BASE_H };
+            const selectFormato = document.getElementById('select-formato');
+            const svgElForm = document.getElementById('poster-svg');
+
+            const BASE_EL = (() => {
+                const cerchi = svgElForm.querySelectorAll('.cls-2');
+                return {
+                    cerchi: Array.from(cerchi).map(c => ({
+                        cx: parseFloat(c.getAttribute('cx')),
+                        cy: parseFloat(c.getAttribute('cy')),
+                        r: parseFloat(c.getAttribute('r'))
+                    })),
+                    alto: { x: 28.35, y: 55.15 },
+                    basso: { x: 813.54, y: 1162.2 },
+                    grande1: { x: 420.94, y: 576.3 },
+                    grande2: { x: 420.94, y: 1096.2 }
+                };
+            })();
+
+            function cambiaFormato(newW, newH) {
+                const sx = newW / BASE_W;
+                const sy = newH / BASE_H;
+                const sf = Math.min(sx, sy);
+
+                formatoCorrente = { w: newW, h: newH };
+                svgElForm.setAttribute('viewBox', `0 0 ${newW} ${newH}`);
+
+                svgElForm.querySelector('rect').setAttribute('width', newW);
+                svgElForm.querySelector('rect').setAttribute('height', newH);
+
+                const cerchi = svgElForm.querySelectorAll('.cls-2');
+                cerchi.forEach((c, i) => {
+                    c.setAttribute('cx', BASE_EL.cerchi[i].cx * sx);
+                    c.setAttribute('cy', BASE_EL.cerchi[i].cy * sy);
+                    c.setAttribute('r', BASE_EL.cerchi[i].r * sf);
+                    c.style.transform = 'none';
+                    c.removeAttribute('data-x');
+                    c.removeAttribute('data-y');
+                });
+
+                function setPos(el, bx, by) {
+                    el.setAttribute('transform', `translate(${bx * sx} ${by * sy})`);
+                }
+
+                function setPosFont(el, bx, by, baseFs) {
+                    el.setAttribute('transform', `translate(${bx * sx} ${by * sy})`);
+                    el.style.fontSize = `${baseFs * sf}px`;
+                }
+
+                setPosFont(svgTestoAlto, BASE_EL.alto.x, BASE_EL.alto.y, BASE_CLS3);
+                setPosFont(svgTestoBasso, BASE_EL.basso.x, BASE_EL.basso.y, BASE_CLS3);
+                setPosFont(svgTestoGrande1, BASE_EL.grande1.x, BASE_EL.grande1.y, BASE_CLS4);
+                setPosFont(svgTestoGrande2, BASE_EL.grande2.x, BASE_EL.grande2.y, BASE_CLS4);
+
+                const marg = 56.69 * sf;
+                const gBordo = svgElForm.querySelector('.g-bordo');
+                const gMargine = svgElForm.querySelector('.g-margine');
+                if (gBordo) { gBordo.setAttribute('width', newW); gBordo.setAttribute('height', newH); }
+                if (gMargine) { gMargine.setAttribute('x', marg); gMargine.setAttribute('y', marg); gMargine.setAttribute('width', newW - marg * 2); gMargine.setAttribute('height', newH - marg * 2); }
+
+                aggiornaTrasformTesto();
+            }
+
+            selectFormato.addEventListener('change', function() {
+                const fmt = FORMATI[this.value];
+                if (fmt) cambiaFormato(fmt.w, fmt.h);
+            });
+
+            aggiornaTrasformTesto();
+
+            // --- 7. GESTIONE ANIMAZIONE ---
+            let animazioneAttiva = false;
+            let animazioneId = null;
+            let hueAngolo = 0;
+            const OVERFLOW = 80;
+            const cerchiAnim = [
+                { tx: 0, ty: 0, vel: 2.5, wobble: 0 },
+                { tx: 0, ty: 0, vel: 2.0, wobble: 0 }
+            ];
+
+            function nuovoTarget(i, vbW, vbH) {
+                cerchiAnim[i].tx = Math.random() * (vbW - OVERFLOW * 2) + OVERFLOW;
+                cerchiAnim[i].ty = Math.random() * (vbH - OVERFLOW * 2) + OVERFLOW;
+            }
+
+            const btnAnim = document.getElementById('btn-animazione');
+            const sliderVel = document.getElementById('slider-velocita');
+
+            function anima() {
+                if (!animazioneAttiva) return;
+                try {
+                    const cerchi = document.querySelectorAll('.cls-2');
+                    const vbW = formatoCorrente.w;
+                    const vbH = formatoCorrente.h;
+                    const speed = parseFloat(sliderVel.value);
+
+                    cerchi.forEach((circle, i) => {
+                        let cx = parseFloat(circle.getAttribute('cx'));
+                        let cy = parseFloat(circle.getAttribute('cy'));
+
+                        const dx = cerchiAnim[i].tx - cx;
+                        const dy = cerchiAnim[i].ty - cy;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+
+                        if (dist < 30) nuovoTarget(i, vbW, vbH);
+
+                        let angolo = Math.atan2(dy, dx);
+                        cerchiAnim[i].wobble += (Math.random() - 0.5) * 0.15 * speed;
+                        angolo += Math.sin(cerchiAnim[i].wobble) * 0.3;
+
+                        const vx = Math.cos(angolo) * cerchiAnim[i].vel * speed;
+                        const vy = Math.sin(angolo) * cerchiAnim[i].vel * speed;
+
+                        cx += vx;
+                        cy += vy;
+
+                        cx = Math.max(-OVERFLOW, Math.min(vbW + OVERFLOW, cx));
+                        cy = Math.max(-OVERFLOW, Math.min(vbH + OVERFLOW, cy));
+
+                        circle.setAttribute('cx', cx);
+                        circle.setAttribute('cy', cy);
+                        circle.style.transform = 'none';
+                        circle.removeAttribute('data-x');
+                        circle.removeAttribute('data-y');
+                    });
+
+                    hueAngolo = (hueAngolo + 0.5 * speed) % 360;
+                    const colore = `hsl(${hueAngolo}, 100%, 50%)`;
+                    elementiDaColorare.forEach(el => el.style.fill = colore);
+
+                    animazioneId = requestAnimationFrame(anima);
+                } catch (e) {
+                    animazioneAttiva = false;
+                    btnAnim.textContent = '▶';
+                }
+            }
+
+            function avviaPrimiTarget() {
+                const vbW = formatoCorrente.w;
+                const vbH = formatoCorrente.h;
+                cerchiAnim.forEach((_, i) => nuovoTarget(i, vbW, vbH));
+            }
+            avviaPrimiTarget();
+
+            btnAnim.addEventListener('click', function() {
+                animazioneAttiva = !animazioneAttiva;
+                this.textContent = animazioneAttiva ? '⏸' : '▶';
+                if (animazioneAttiva) anima();
+                else cancelAnimationFrame(animazioneId);
+            });
+
+            // --- 8. GESTIONE POSIZIONAMENTO RANDOM CERCHI (SPACEBAR) ---
             document.addEventListener('keydown', function(event) {
-                if (event.code === 'Space') {
+                if (event.code === 'Space' && document.activeElement && document.activeElement.tagName !== 'INPUT') {
                     event.preventDefault();
 
                     const cerchi = document.querySelectorAll('.cls-2');
@@ -293,7 +697,92 @@
                 }
             });
 
-            // --- 6. GESTIONE ESPORTAZIONE PNG ---
+            // --- 9. GESTIONE TOGGLE PANNELLO ---
+            const btnToggle = document.getElementById('btn-toggle');
+            const pannello = document.getElementById('pannello-controllo');
+
+            btnToggle.addEventListener('click', function() {
+                pannello.classList.toggle('pannello-nascosto');
+                btnToggle.textContent = pannello.classList.contains('pannello-nascosto') ? '✎' : '☰';
+            });
+
+            // --- 10. GESTIONE REGISTRAZIONE VIDEO ---
+            const btnRecord = document.getElementById('btn-record');
+            const selectDurata = document.getElementById('select-durata');
+
+            btnRecord.addEventListener('click', function() {
+                const durata = parseInt(selectDurata.value);
+                const durataMs = durata * 1000;
+                const canvas = document.createElement('canvas');
+                canvas.width = formatoCorrente.w;
+                canvas.height = formatoCorrente.h;
+                const ctx = canvas.getContext('2d');
+                const serializer = new XMLSerializer();
+                const svgEl = document.getElementById('poster-svg');
+
+                const mimeTypes = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'];
+                let selectedMime = mimeTypes.find(m => MediaRecorder.isTypeSupported(m)) || 'video/webm';
+
+                const stream = canvas.captureStream(30);
+                const recorder = new MediaRecorder(stream, { mimeType: selectedMime });
+                const chunks = [];
+
+                recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+                recorder.onstop = () => {
+                    const blob = new Blob(chunks, { type: 'video/webm' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'poster-animato.webm';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    btnRecord.disabled = false;
+                    btnRecord.textContent = '🔴 Registra';
+                };
+
+                recorder.start();
+                btnRecord.disabled = true;
+                btnRecord.textContent = '⏺ ' + durata + 's...';
+
+                if (!animazioneAttiva) {
+                    animazioneAttiva = true;
+                    btnAnim.textContent = '⏸';
+                    anima();
+                }
+
+                const startTime = performance.now();
+
+                function catturaFrame() {
+                    const elapsed = performance.now() - startTime;
+                    if (elapsed >= durataMs) {
+                        recorder.stop();
+                        return;
+                    }
+
+                    const svgStr = serializer.serializeToString(svgEl);
+                    const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+                    const url = URL.createObjectURL(blob);
+                    const img = new Image();
+                    img.onload = () => {
+                        ctx.fillStyle = 'black';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        ctx.drawImage(img, 0, 0);
+                        URL.revokeObjectURL(url);
+                        setTimeout(catturaFrame, 1000 / 30);
+                    };
+                    img.onerror = () => {
+                        URL.revokeObjectURL(url);
+                        setTimeout(catturaFrame, 1000 / 30);
+                    };
+                    img.src = url;
+                }
+
+                catturaFrame();
+            });
+
+            // --- 11. GESTIONE ESPORTAZIONE PNG ---
             const btnScarica = document.getElementById('btn-scarica');
             
             btnScarica.addEventListener('click', function() {
@@ -309,8 +798,8 @@
                 const img = new Image();
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
-                    canvas.width = 841.89;
-                    canvas.height = 1190.55;
+                    canvas.width = formatoCorrente.w;
+                    canvas.height = formatoCorrente.h;
                     const ctx = canvas.getContext('2d');
                     
                     ctx.fillStyle = "black";
