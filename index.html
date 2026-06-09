@@ -126,6 +126,7 @@
             <input type="text" id="input-testo-basso" value="MAKE EVERYTHING BIG">
         </div>
         <button id="btn-scarica">Download Poster PNG</button>
+        <div style="font-size:11px;opacity:0.6;margin-top:5px">Press SPACEBAR to randomize circles</div>
     </div>
 
     <div id="svg-container">
@@ -246,7 +247,31 @@
                 });
             });
 
-            // --- 4. GESTIONE ESPORTAZIONE PNG ---
+            // --- 4. GESTIONE POSIZIONAMENTO RANDOM CERCHI (SPACEBAR) ---
+            document.addEventListener('keydown', function(event) {
+                if (event.code === 'Space') {
+                    event.preventDefault();
+
+                    const cerchi = document.querySelectorAll('.cls-2');
+                    const vbW = 841.89;
+                    const vbH = 1190.55;
+                    const pad = 50;
+
+                    cerchi.forEach(circle => {
+                        const cx = Math.random() * (vbW - pad * 2) + pad;
+                        const cy = Math.random() * (vbH - pad * 2) + pad;
+
+                        circle.setAttribute('cx', cx);
+                        circle.setAttribute('cy', cy);
+
+                        circle.style.transform = 'none';
+                        circle.removeAttribute('data-x');
+                        circle.removeAttribute('data-y');
+                    });
+                }
+            });
+
+            // --- 5. GESTIONE ESPORTAZIONE PNG ---
             const btnScarica = document.getElementById('btn-scarica');
             
             btnScarica.addEventListener('click', function() {
