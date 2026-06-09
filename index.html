@@ -64,6 +64,16 @@
             outline: none;
         }
 
+        #pannello-controllo input[type="color"] {
+            width: 100%;
+            height: 40px;
+            padding: 0;
+            border: none;
+            border-radius: 6px;
+            background: none;
+            cursor: pointer;
+        }
+
         #pannello-controllo label {
             font-size: 12px;
             text-transform: uppercase;
@@ -125,8 +135,12 @@
             <label>Bottom Text</label>
             <input type="text" id="input-testo-basso" value="MAKE EVERYTHING BIG">
         </div>
+        <div>
+            <label>Color</label>
+            <input type="color" id="input-colore" value="#ffffff">
+        </div>
         <button id="btn-scarica">Download Poster PNG</button>
-        <div style="font-size:11px;opacity:0.6;margin-top:5px">Press SPACEBAR to randomize circles</div>
+        <div style="font-size:11px;opacity:0.6;margin-top:2px">Press SPACEBAR to randomize circles</div>
     </div>
 
     <div id="svg-container">
@@ -247,7 +261,15 @@
                 });
             });
 
-            // --- 4. GESTIONE POSIZIONAMENTO RANDOM CERCHI (SPACEBAR) ---
+            // --- 4. GESTIONE COLORE DA TAVOLOZZA ---
+            const inputColore = document.getElementById('input-colore');
+            inputColore.addEventListener('input', function() {
+                elementiDaColorare.forEach(el => {
+                    el.style.fill = this.value;
+                });
+            });
+
+            // --- 5. GESTIONE POSIZIONAMENTO RANDOM CERCHI (SPACEBAR) ---
             document.addEventListener('keydown', function(event) {
                 if (event.code === 'Space') {
                     event.preventDefault();
@@ -271,7 +293,7 @@
                 }
             });
 
-            // --- 5. GESTIONE ESPORTAZIONE PNG ---
+            // --- 6. GESTIONE ESPORTAZIONE PNG ---
             const btnScarica = document.getElementById('btn-scarica');
             
             btnScarica.addEventListener('click', function() {
