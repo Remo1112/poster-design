@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poster Interattivo - Generatore</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+    
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: sans-serif;
+        }
+
+        #svg-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #svg-container svg {
+            width: 100%;
+            height: 100%;
+            max-width: 100vw;
+            max-height: 100vh;
+        }
+
+        /* --- STILE DEL PANNELLO DI CONTROLLO --- */
+        #pannello-controllo {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        #pannello-controllo input {
+            background: transparent;
+            border: 1px solid white;
+            color: white;
+            padding: 8px;
+            font-size: 14px;
+            border-radius: 6px;
+            width: 200px;
+            outline: none;
+        }
+
+        #pannello-controllo label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.8;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        #btn-scarica {
+            background-color: #ffffff;
+            color: #000000;
+            border: none;
+            padding: 10px 15px;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            margin-top: 10px;
+        }
+
+        #btn-scarica:hover {
+            background-color: #cccccc;
+        }
+
+        #btn-scarica:active {
+            transform: scale(0.95);
+        }
+
+        circle {
+            cursor: grab;
+            touch-action: none;
+            pointer-events: all;
+        }
+
+        circle:active {
+            cursor: grabbing;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="pannello-controllo">
+        <div>
+            <label>Testo in alto</label>
+            <input type="text" id="input-testo-alto" value="PRESS THAT KEY">
+        </div>
+        <div>
+            <label>Parola Grande 1</label>
+            <input type="text" id="input-testo-grande-1" value="TYPE">
+        </div>
+        <div>
+            <label>Parola Grande 2</label>
+            <input type="text" id="input-testo-grande-2" value="HERE">
+        </div>
+        <div>
+            <label>Testo in basso</label>
+            <input type="text" id="input-testo-basso" value="MAKE EVERYTHING BIG">
+        </div>
+        <button id="btn-scarica">Scarica Poster PNG</button>
+    </div>
+
+    <div id="svg-container">
+        <?xml version="1.0" encoding="UTF-8"?>
+        <svg id="poster-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 841.89 1190.55">
+            <defs>
+                <style>
+                .cls-2, .cls-3, .cls-4 {
+                    fill: #fff;
+                    mix-blend-mode: difference;
+                    transition: fill 0.1s ease;
+                }
+
+                /* --- APPLICATO BLOCCO SELEZIONE E TRASPARENZA AI POINTER EVENTS --- */
+                text {
+                    user-select: none;
+                    -webkit-user-select: none;
+                    pointer-events: none;
+                }
+
+                .cls-3 {
+                    font-family: DrukCondTrial-Super, 'Druk Cond Trial', sans-serif;
+                    font-size: 36px;
+                    letter-spacing: 2px;
+                }
+
+                .cls-6 {
+                    isolation: isolate;
+                }
+
+                .cls-4 {
+                    font-family: DrukCondTrial-SuperItalic, 'Druk Cond Trial', sans-serif;
+                    font-size: 654.11px; 
+                    font-style: italic;
+                    font-weight: 900;
+                    text-anchor: middle;
+                }
+                </style>
+            </defs>
+            <g class="cls-6">
+                <g id="_2" data-name="2">
+                    <rect x="0" y="0" width="841.89" height="1190.55" fill="#000000"/>
+                    
+                    <circle class="cls-2" cx="420.94" cy="871.65" r="392.6"/>
+                    <circle class="cls-2" cx="420.94" cy="349.27" r="392.6"/>
+                    
+                    <text id="svg-testo-alto" class="cls-3" text-anchor="start" transform="translate(28.35 55.15)">PRESS THAT KEY</text>
+                    <text id="svg-testo-basso" class="cls-3" text-anchor="end" transform="translate(813.54 1162.2)">MAKE EVERYTHING BIG</text>
+                    
+                    <text id="svg-testo-grande-1" class="cls-4" transform="translate(420.94 576.3)">TYPE</text>
+                    <text id="svg-testo-grande-2" class="cls-4" transform="translate(420.94 1096.2)">HERE</text>
+                </g>
+            </g>
+        </svg>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // --- 1. GESTIONE DEI TESTI EDITABILI ---
+            const inputAlto = document.getElementById('input-testo-alto');
+            const inputBasso = document.getElementById('input-testo-basso');
+            const inputGrande1 = document.getElementById('input-testo-grande-1');
+            const inputGrande2 = document.getElementById('input-testo-grande-2');
+            
+            const svgTestoAlto = document.getElementById('svg-testo-alto');
+            const svgTestoBasso = document.getElementById('svg-testo-basso');
+            const svgTestoGrande1 = document.getElementById('svg-testo-grande-1');
+            const svgTestoGrande2 = document.getElementById('svg-testo-grande-2');
+
+            // Event Listener per aggiornare il testo in tempo reale
+            inputAlto.addEventListener('input', function() { svgTestoAlto.textContent = this.value; });
+            inputBasso.addEventListener('input', function() { svgTestoBasso.textContent = this.value; });
+            inputGrande1.addEventListener('input', function() { svgTestoGrande1.textContent = this.value; });
+            inputGrande2.addEventListener('input', function() { svgTestoGrande2.textContent = this.value; });
+
+            // --- 2. GESTIONE DEL DRAG DEI CERCHI ---
+            interact('circle').draggable({
+                inertia: true,
+                listeners: {
+                    move (event) {
+                        const target = event.target;
+                        const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+                        const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+
+                        target.style.transform = `translate(${x}px, ${y}px)`;
+
+                        target.setAttribute('data-x', x);
+                        target.setAttribute('data-y', y);
+                    }
+                }
+            });
+
+            // --- 3. GESTIONE DEL COLORE (Arcobaleno + Bianco) ---
+            let scrollValore = 0; 
+            const elementiDaColorare = document.querySelectorAll('.cls-2, .cls-3, .cls-4');
+
+            window.addEventListener('wheel', function(event) {
+                scrollValore += event.deltaY * 0.5; 
+
+                if (scrollValore >= 420) scrollValore -= 420;
+                if (scrollValore < 0) scrollValore += 420;
+
+                let nuovoColore;
+
+                if (scrollValore <= 360) {
+                    nuovoColore = `hsl(${scrollValore}, 100%, 50%)`;
+                } else if (scrollValore <= 390) {
+                    let luminosita = 50 + ((scrollValore - 360) / 30) * 50;
+                    nuovoColore = `hsl(360, 100%, ${luminosita}%)`;
+                } else {
+                    let luminosita = 100 - ((scrollValore - 390) / 30) * 50;
+                    nuovoColore = `hsl(0, 100%, ${luminosita}%)`;
+                }
+
+                elementiDaColorare.forEach(el => {
+                    el.style.fill = nuovoColore;
+                });
+            });
+
+            // --- 4. GESTIONE ESPORTAZIONE PNG ---
+            const btnScarica = document.getElementById('btn-scarica');
+            
+            btnScarica.addEventListener('click', function() {
+                const svgElement = document.getElementById('poster-svg');
+                
+                const serializer = new XMLSerializer();
+                let svgString = serializer.serializeToString(svgElement);
+
+                const svgBlob = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
+                const DOMURL = window.URL || window.webkitURL || window;
+                const url = DOMURL.createObjectURL(svgBlob);
+
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 841.89;
+                    canvas.height = 1190.55;
+                    const ctx = canvas.getContext('2d');
+                    
+                    ctx.fillStyle = "black";
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0);
+                    DOMURL.revokeObjectURL(url);
+
+                    const imgURI = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
+                    
+                    const a = document.createElement('a');
+                    a.setAttribute('download', 'poster-generato.png');
+                    a.setAttribute('href', imgURI);
+                    a.setAttribute('target', '_blank');
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                };
+                img.src = url;
+            });
+
+        });
+    </script>
+</body>
+</html>
