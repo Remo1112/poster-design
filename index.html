@@ -429,6 +429,31 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             
+            // --- 0. PRE-CARICA FONT PER EXPORT (incorpora nel SVG) ---
+            (async () => {
+                const fontEntries = [
+                    ['DrukCondTrial-Super', 'DrukCond-Super-Trial.otf', 'normal'],
+                    ['DrukCondTrial-SuperItalic', 'DrukCond-SuperItalic-Trial.otf', 'italic']
+                ];
+                let fontCss = '';
+                for (const [name, path, style] of fontEntries) {
+                    try {
+                        const res = await fetch(path);
+                        const blob = await res.blob();
+                        const dataUrl = await new Promise(r => {
+                            const reader = new FileReader();
+                            reader.onloadend = () => r(reader.result);
+                            reader.readAsDataURL(blob);
+                        });
+                        fontCss += `@font-face{font-family:'${name}';src:url(${dataUrl}) format('opentype');font-weight:900;font-style:${style}}`;
+                    } catch (e) {}
+                }
+                if (fontCss) {
+                    const styleEl = document.querySelector('#poster-svg defs style');
+                    if (styleEl) styleEl.textContent = fontCss + styleEl.textContent;
+                }
+            })();
+            
             // --- 1. GESTIONE DEI TESTI EDITABILI ---
             const inputAlto = document.getElementById('input-testo-alto');
             const inputBasso = document.getElementById('input-testo-basso');
