@@ -823,6 +823,12 @@
             const btnToggle = document.getElementById('btn-toggle');
             const pannello = document.getElementById('pannello-controllo');
 
+            // Impedisce che la rotellina nel pannello cambi colore
+            pannello.addEventListener('wheel', function(e) {
+                e.stopPropagation();
+            });
+
+            // Impedisce lo scroll del body via touch quando il pannello è aperto
             function bloccaScrollEsterno(e) {
                 if (!pannello.contains(e.target)) {
                     e.preventDefault();
@@ -833,10 +839,8 @@
                 const nascosto = pannello.classList.contains('pannello-nascosto');
                 if (nascosto) {
                     document.removeEventListener('touchmove', bloccaScrollEsterno, { passive: false });
-                    document.removeEventListener('wheel', bloccaScrollEsterno, { passive: false });
                 } else {
                     document.addEventListener('touchmove', bloccaScrollEsterno, { passive: false });
-                    document.addEventListener('wheel', bloccaScrollEsterno, { passive: false });
                 }
             }
 
