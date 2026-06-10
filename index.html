@@ -724,6 +724,11 @@
                 btnToggle.textContent = pannello.classList.contains('pannello-nascosto') ? '✎' : '☰';
             });
 
+            if (window.innerWidth <= 768) {
+                pannello.classList.add('pannello-nascosto');
+                btnToggle.textContent = '✎';
+            }
+
             // --- 10. GESTIONE REGISTRAZIONE VIDEO ---
             const btnRecord = document.getElementById('btn-record');
             const selectDurata = document.getElementById('select-durata');
