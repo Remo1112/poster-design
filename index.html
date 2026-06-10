@@ -108,7 +108,6 @@
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             overscroll-behavior: contain;
-            touch-action: pan-y;
             transition: transform 0.3s ease, opacity 0.3s ease;
         }
 
@@ -329,6 +328,7 @@
                 padding: 12px;
                 gap: 8px;
                 max-height: calc(100vh - 70px);
+                max-height: calc(100dvh - 70px);
             }
 
             #pannello-controllo input {
@@ -823,15 +823,35 @@
             const btnToggle = document.getElementById('btn-toggle');
             const pannello = document.getElementById('pannello-controllo');
 
+            function bloccaScrollEsterno(e) {
+                if (!pannello.contains(e.target)) {
+                    e.preventDefault();
+                }
+            }
+
+            function aggiornaBloccoScroll() {
+                const nascosto = pannello.classList.contains('pannello-nascosto');
+                if (nascosto) {
+                    document.removeEventListener('touchmove', bloccaScrollEsterno, { passive: false });
+                    document.removeEventListener('wheel', bloccaScrollEsterno, { passive: false });
+                } else {
+                    document.addEventListener('touchmove', bloccaScrollEsterno, { passive: false });
+                    document.addEventListener('wheel', bloccaScrollEsterno, { passive: false });
+                }
+            }
+
             btnToggle.addEventListener('click', function() {
                 pannello.classList.toggle('pannello-nascosto');
                 btnToggle.textContent = pannello.classList.contains('pannello-nascosto') ? '✎' : '☰';
+                aggiornaBloccoScroll();
             });
 
             if (window.innerWidth <= 768) {
                 pannello.classList.add('pannello-nascosto');
                 btnToggle.textContent = '✎';
             }
+
+            aggiornaBloccoScroll();
 
             // --- 10. GESTIONE REGISTRAZIONE VIDEO ---
             const btnRecord = document.getElementById('btn-record');
